@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>KT</title>
+</head>
+<body>
+    <h1>Thông tin khách hàng</h1>
+        <p>Tên: {{ user.fullname }}</p>
+        <p>Số điện thoại: {{ user.phone }}</p>
+        <p>Email: {{ user.email }}</p>        
+    <h1>Đơn hàng</h1>        
+        <p>Phí sản phẩm: {{ found_order.order_fee }}$</p>
+        <p>Phí ship: {{ found_order.ship_fee }}$</p>
+        <p>Tổng đơn hàng: {{ found_order.order_fee + found_order.ship_fee }}$</p>       
+        <p>Địa chỉ nhận hàng: {{ found_order.address }}</p>
+        <hr>
+        
+</body>
+</html>

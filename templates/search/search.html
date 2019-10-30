@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>KT</title>
+
+    {% include 'meta-data.html' %}
+    <!-- Trang hiển thị danh mục sản phẩm -->
+</head>
+<body>
+    {% include 'homepage/navigation.html' %}
+    <div class = "d-flex flex-wrap justify-content-around p-100px">
+        {% for product in all_product %}
+            <div class="card text-light my-3" style="height: 440px; width: 15rem;">
+                <img class="card-img-top border border-secondary" style="height: 230px" src="{{ product.image }}">
+                <div class="card-body border border-secondary">
+                    <h5 class="card-title text-dark" style="font-size: 90%">{{ product.name }}</h5>
+                    <P class="card-text text-dark" style="font-size: 70%">Loại: {{ product.product_type }}</P>
+                    <p class="card-text text-dark" style="font-size: 70%">Thương hiệu: {{ product.brand }}</p>
+                    <p class="card-text text-dark" style="font-size: 70%">Giá: {{ product.price }}$</p>
+                    <div class="d-flex flex-wrap justify-content-around">
+                        {% if session['level_loggedin'] == '2' %}
+                            {% if product.status == "Còn hàng" %}
+                                <a href="{{ url_for('addOrder', product_id=product._id) }}" class="btn btn-sm btn-dark" style="font-size: 70%">Thêm vào giỏ hàng</a>
+                            {% else %}
+                                <button type="button" class="btn btn-sm btn-dark" style="font-size: 70%" disabled>Hết hàng</button>
+                            {% endif %}
+                                <a href="{{ url_for('productDetail', id=product._id) }}" class="btn btn-sm btn-dark font-text" style="font-size: 60%">Xem chi tiết</a>
+                        {% elif session['level_loggedin'] == '3' %}
+                            <a href="{{ url_for('logoutShipper_loginUser') }}" class="btn btn-sm btn-dark font-text" style="font-size: 60%">Đăng nhập User để mua hàng</a>
+                        {% endif %}
+                        </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% include 'homepage/footer.html' %}
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>KT</title>
+</head>
+<body>
+    <form method="POST">
+        <input type="text" name="image" value="{{ product.image }}"><br>
+        <input type="text" name="name" value="{{ product.name }}"><br>
+        <input type="text" name="description" value="{{ product.description }}"><br>
+        <input type="text" name="status" value="{{ product.status }}"><br>
+        <input type="number" name="price" value="{{ product.price }}"><br>
+        <input type="text" name="brand" value="{{ product.brand }}"><br>
+        <input type="text" name="product_type" value="{{ product.product_type }}"><br>
+        <input type="text" name="product_gender" value="{{ product.product_gender }}"><br>
+        <input type="text" name="product_kids" value="{{ product.product_kids }}"><br>
+        <input type="submit" value="Sửa">
+    </form>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!-- Nav -->
+<nav class="navbar navbar-light bg-white h-100px">
+    <div class="col-md-4">
+        <form>
+            <input type="text" class="form-control border-0" placeholder="Search">
+        </form>
+    </div>
+    <div class="col-md-4 d-flex justify-content-center">
+        <a href="{{ url_for('index') }}">
+            <span class="navbar-brand mb-0 h1 b-2px-sl-bl text-center">KT SHOP</span>
+        </a>
+    </div>
+    <div class="col-md-4 d-flex justify-content-end align-items-center">
+        <a href="" class="fas fa-user f-s-icon-25px t-c-l-i-nav m-2"></a>
+        <a href="" class="far fa-heart f-s-icon-25px t-c-l-i-nav m-2 "></a>
+        <a href="" class="fas fa-shopping-cart f-s-icon-25px t-c-l-i-nav mr-5 ml-2"></a>
+    </div>
+</nav>
+<!-- Menu -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white b-t-bt-1px-sl-gr">
+    <div class="collapse navbar-collapse justify-content-center" id="navbarNavDropdown">
+        <ul class="navbar-nav">
+            <li class="nav-item ml-3">
+                <a class="nav-link text-up" href="{{ url_for('index') }}">Home</a>
+            </li>
+            <li class="nav-item ml-3">
+                <a class="nav-link text-up" href="#">About</a>
+            </li>
+            <li class="nav-item dropdown ml-3">
+                <a class="nav-link dropdown-toggle text-up" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Shop
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <a class="dropdown-item" href="{{ url_for('search',search='Men') }}">Men</a>
+                <a class="dropdown-item" href="{{ url_for('search',search='Women') }}">Women</a>
+                <a class="dropdown-item" href="{{ url_for('search',search='Boy') }}">Boy</a>
+                <a class="dropdown-item" href="{{ url_for('search',search='Girl') }}">Girl</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown ml-3">
+                <a class="nav-link dropdown-toggle text-up" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                catalogue
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <a class="dropdown-item" href="{{ url_for('search_type',search_type='Giầy') }}">Shoes</a>
+                <a class="dropdown-item" href="{{ url_for('search_type',search_type='Áo') }}">Shirt</a>
+                <a class="dropdown-item" href="{{ url_for('search_type',search_type='Quần') }}">Trousers</a>
+                </div>
+            </li>
+            <li class="nav-item ml-3">
+                <a class="nav-link text-up" href="#">new arrivals</a>
+            </li>
+            <li class="nav-item ml-3">
+                <a class="nav-link text-up" href="#">contact</a>
+            </li>
+            <li class="nav-item ml-3">
+                <a class="nav-link text-up" href="{{ url_for('homeLogin') }}">user/shipper</a>
+            </li>
+            <li class="nav-item ml-3">
+                <a class="nav-link text-up" href="{{ url_for('logout') }}">logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>

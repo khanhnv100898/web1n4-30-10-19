@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>KT</title>
+
+    {% include 'meta-data.html' %}
+    <!-- Hiển thị 2 trạng thái đơn đã nhận -->
+</head>
+<body>
+    {% include 'homepage/navigation.html' %}
+    <div class="bg-dark h-750px d-flex justify-content-center" style="padding-top: 200px">
+        <div>
+            <a href="{{ url_for('orderStatus') }}" class="btn btn-primary btn-lg font-text" role="button">Đơn hàng chưa có Shipper nhận</a>
+            <br><br>
+            <a href="{{ url_for('orderStatusReceiver') }}" class="btn btn-primary btn-lg font-text" role="button">Các đơn hàng đã có shipper nhận</a>
+            <br><br>
+            <a href="{{ url_for('homeLogin') }}" class="btn btn-primary btn-lg font-text" role="button">Trở về</a>
+        </div>
+    </div>
+</body>
+</html>

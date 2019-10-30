@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>KT</title>
+
+    <!-- Trang Đăng nhập cho User -->
+    {% include 'meta-data.html' %}
+
+</head>
+<body>
+    <div class="bg-login d-flex justify-content-center align-items-center">
+        <div class="col-md-3 h-500px bg-light rounded">
+            <br>
+            <a href="{{ url_for('index') }}">
+                <h4 class="font-lato text-center my-5">K-T</h4>
+            </a>
+            <br>   
+            <form method="POST">
+                <div class="form-group">
+                    <label>
+                        <i class="far fa-user mx-1"></i>
+                        <span>Username</span>
+                    </label>
+                    <input type="text" class="form-control" name= username placeholder="Enter username" required>
+                    </div>
+                    <div class="form-group">
+                    <label>
+                        <i class="fas fa-unlock mx-1"></i>
+                        <span>Password</span>
+                    </label>
+                    <input type="password" class="form-control" name= password placeholder="Password" required>
+                </div>
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('signUp') }}">
+                        <button type="button" class="btn btn-link">Register</button>
+                    </a>
+                    <input type="submit" class="btn btn-primary mx-2 px-4" value="Log In">
+                </div>
+                <br>
+                <div class="text-center mt-5">
+                    <p class="font-italic font-weight-light">Lorem ipsum dolor sit, amet consectetur </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>KT</title>
+
+    {% include 'meta-data.html' %}
+
+    <!-- Trang thông tin cá nhân của Shipper -->
+</head>
+<body>
+    {% include 'homepage/navigation.html' %}
+
+    <div class="bg-dark" style="height:700px; padding-top: 100px">
+        <h4 class="text-center text-light font-text">Thông tin cá nhân</h4>
+        <h3 class="text-center text-light font-logo"><i class="fas fa-shoe-prints text-light mr-2"></i>KT</h3>
+        <br><br>
+        <div class="container bg-secondary w-25 py-4 border rounded text-light">
+            <p class="font-text">Tên đầy đủ: {{ found_shipper.fullname }}</p>
+            <p class="font-text">Số điện thoại: {{ found_shipper.phone }}</p>
+            <p class="font-text">Email: {{ found_shipper.email }}</p>
+            <p class="font-text">Chứng mình thư nhân dân: {{ found_shipper.id_person }}</p>
+            <p class="font-text">Số dư: {{ found_shipper.balance }}$</p>
+    
+            <div class="form-group mt-4 d-flex justify-content-around">
+                <div>
+                    <a class="btn btn-dark" href="{{ url_for('updateShipper',id = found_shipper._id) }}" role="button">Cập nhật thông tin</a>
+                </div>
+                <!-- Back -->
+                <div>
+                    <a class="btn btn-dark" href="{{ url_for('homeLogin') }}" role="button">Trở về</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bg-dark text-center text-light font-text" style="height: 50px; padding-top: 15px;">Được thực hện bởi KT</div>
+    
+</body>
+</html>

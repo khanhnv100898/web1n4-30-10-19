@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>KT</title>
+</head>
+<body>
+    <a href="{{ url_for('shipperInformation') }}">Trở về</a>
+    {% if template == 1 %}
+        <h1>Đơn hàng</h1>
+        {% for order in all_order %}
+            <p>Tổng đơn hàng: {{ order.order_fee }}$</p>
+            <p>Phí ship: {{ order.ship_fee }}$</p>       
+            <p>Địa chỉ nhận hàng: {{ order.address }}</p>
+            <a href="{{ url_for('requestDetail',order_id=order._id) }}">Chi tiết đơn hàng</a>
+            <br>           
+            <a href="">Nhận đơn</a>
+            <hr>
+        {% endfor %}
+    {% elif template == 0 %}
+        <h1>Hiện chưa có yêu cầu</h1>
+    {% endif %}
+</body>
+</html>

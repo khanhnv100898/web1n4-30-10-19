@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>KT</title>
+</head>
+<body>
+    <table border="1px" align="center" >
+        <thead>
+            <th>STT</th>
+            <th>FullName</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Level</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Balance</th>
+        </thead>    
+        <tbody class='ul1'>
+            {% for login in all_login %}
+                <tr>
+                    <td class="index">{{ loop.index }}</td>
+                    <td class="fname">{{ login.fullname }}</td>
+                    <td class="uname">{{ login.username }}</td>
+                    <td class="pass">{{ login.password }}</td>
+                    <td class="lv">{{ login.level }}</td>
+                    <td class="em">{{ login.email }}</td>
+                    <td class="phone">{{ login.phone }}</td>
+                    <td class="address">{{ login.address }}</td>
+                    <td class="balance">{{ login.balance }}</td>
+                    <td>
+                        <a href="{{ url_for('deleteLogin',id=login._id) }}">Xóa</a>
+                        <a href="{{ url_for('updateLogin',id = login._id) }}">Sửa</a>
+                    </td>
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+    <a href="{{ url_for('output_excel') }}">Xuất file Excel</a>
+    <hr> 
+</body>
+</html>
