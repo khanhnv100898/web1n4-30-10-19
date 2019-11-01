@@ -37,7 +37,6 @@ Test = ttw_db["tests"]
 #         }
 #         Order.update_one(order,update)
 
-
 a = {
     "_id":"1",
     "name":"Khanh"
@@ -77,20 +76,12 @@ d = {
 #     { '$pull': { "test" : { '_id': '1' } } },
 # )
 
-
-
 # for i in ar:
 #     update = {"$addToSet":{"test":{
 #         "_id":i['_id'],
 #         "name":i['name'],
 #     }}}
 #     Test.update(test,update)
-
-
-
-
-
-
 
         # update_order = {"$addToSet":{"product_id":{
         #     "_id":i['_id'],

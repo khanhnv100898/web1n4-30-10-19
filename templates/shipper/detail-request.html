@@ -84,14 +84,14 @@
         </div>
         {% if found_order.status == "User đã nhận hàng" %}
             <div class="d-flex justify-content-center pt-3">
-                <a href="{{ url_for('shipped_history') }}" class="btn btn-primary btn-lg font-text" role="button">Trở về</a>
+                <a href="{{ url_for('historyShipper') }}" class="btn btn-primary btn-lg font-text" role="button">Trở về</a>
             </div>
         {% elif found_order.status == "Shipper chưa nhận đơn" %}
             <div class="d-flex justify-content-center pt-3">
                 <a href="{{ url_for('requestShipper') }}" class="btn btn-primary btn-lg font-text" role="button">Trở về</a>
             </div>
         {% elif found_order.status == "Shipper đã nhận hàng, bắt đầu tiến hành vận chuyển" %}
-            <div>
+            <div class="d-flex justify-content-center pt-3">
                 <a href="{{ url_for('ship_status', status='Shipper đã nhận hàng, bắt đầu tiến hành vận chuyển') }}" class="btn btn-primary btn-lg font-text" role="button">Trở về</a>
             </div>
         {% elif found_order.status == "Shipper đã nhận đơn, đang tiến hành lấy hàng" %}

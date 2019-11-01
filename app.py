@@ -37,16 +37,6 @@ def search_kids_info():
     product = Product.find({"product_kids": True})
     return render_template('search/search.html', all_product=product)
 
-# @app.route('/search_kid/<searchkid>')
-# def search_kid(searchkid):
-#     session['searchkid'] = searchkid
-#     all_product_kids = Product.find({'product_kids': searchkid})
-#     if all_product_kids is not None:
-#         return render_template('search/search.html', all_product=all_product_kids)
-#     else:
-#         all_product_kids = Product.find({'product_kids': True})
-#         return render_template('search/search.html', all_product=all_product_kids)
-
 
 @app.route('/search_type/<search_type>')
 def search_type(search_type):
@@ -75,32 +65,38 @@ def signUp():
         email = form['email']
         phone = form['phone']
         address = form['address']
-        # id_person = form['id_person']
+        id_person = form['id_person']
         balance = form['balance']
 
-        new_login = {
-            "fullname": fullname,
-            "username": username,
-            "password": password,
-            "level": 2,
-            "email": email,
-            "phone": phone,
-            # "id_person":id_person,
-            "address": address,
-            "balance": balance,
-        }
-        Login.insert_one(new_login)
+        found_login = Login.find({"username": username})
+        c = int(found_login.count())
+        if c > 0:
+            return render_template('signup/signup-fail.html', template=1)
+        else:
+            new_login = {
+                "fullname": fullname,
+                "username": username,
+                "password": password,
+                "level": 2,
+                "email": email,
+                "phone": phone,
+                "id_person": id_person,
+                "address": address,
+                "balance": balance,
+            }
+            Login.insert_one(new_login)
 
-        found_login = Login.find_one({'username': username})
-        gmail = GMail('ngovankhanh108@gmail.com', 'KhanhNgo108')
-        html_content = '''
-    Chúc mừng bạn đã tạo tài khoản thành công trên hệ thống.
-    Cảm ơn quý khách đã sử dụng dịch vụ của chúng tôi!
-    '''
-        msg = Message('Tạo tài khoản thành công',
-                      to=found_login['email'], html=html_content)
-        gmail.send(msg)
-        return redirect('/login')
+            found_login = Login.find_one({'username': username})
+            gmail = GMail('ngovankhanh108@gmail.com', 'KhanhNgo108')
+            html_content = '''
+        Chúc mừng bạn đã tạo tài khoản thành công trên hệ thống.
+        Cảm ơn quý khách đã sử dụng dịch vụ của chúng tôi!
+        '''
+            msg = Message('Tạo tài khoản thành công',
+                          to=found_login['email'], html=html_content)
+            gmail.send(msg)
+            return redirect('/login')
+
 
 # Đăng nhập phân quyền
 @app.route('/login', methods=['GET', 'POST'])
@@ -203,7 +199,6 @@ def updateLoginUser(id):
         Login.update_one(login, update_login)
         return redirect('/homeLogin')
 
-
 # Giao diện Information
 @app.route('/homeLogin')
 def homeLogin():
@@ -240,7 +235,6 @@ def userInformation():
         return render_template('user/information.html', found_user=login)
     else:
         return 'Login is not found'
-
 
 # Nạp tiền cho tài khoản User
 @app.route('/add_money_user', methods=['GET', 'POST'])
@@ -334,7 +328,6 @@ def addOrder(product_id):
     else:
         return redirect('/login')
 
-# Todo: Hiển thị thông tin sản phẩm có trong giỏ hàng / Continue
 # Hiển thị giỏ hàng
 @app.route('/cart', methods=['GET', 'POST'])
 def cart():
@@ -355,7 +348,6 @@ def cart():
         }}
         Order.update_one(found_order, update)
     return redirect('/cart')
-
 
 # Xóa một sản phẩm khỏi giỏ hàng
 @app.route('/delete_product/<product_id>')
@@ -379,7 +371,6 @@ def delete_product(product_id):
         {'$set': {"order_fee": new_order_fee, "ship_fee": new_ship_fee}},
     )
     return redirect('/cart')
-
 
 # Gửi yêu cầu mua đơn hàng
 @app.route('/ordered/<order_id>')
@@ -422,7 +413,8 @@ def ordered(order_id):
 # Hiển thị trạng thái đơn hàng đã yêu cầu
 @app.route('/order_status')
 def orderStatus():
-    all_order = Order.find({'user_id': session['user_id'], 'is_ordered': True})
+    all_order = Order.find(
+        {'user_id': session['user_id'], 'is_ordered': True, 'shipper_id': "null"})
     if all_order is not None:
         return render_template('user/order-status.html', all_order=all_order, template=1)
     else:
@@ -507,7 +499,6 @@ def order_history():
     else:
         return render_template('user/order-history.html', template=0)
 
-
 # Todo SHIPPER
 # Chức năng của shipper
 
@@ -546,29 +537,34 @@ def signUpShipper():
         id_person = form['id_person']
         # balance = form['balance']
 
-        new_login = {
-            "fullname": fullname,
-            "username": username,
-            "password": password,
-            "level": 3,
-            "email": email,
-            "phone": phone,
-            "id_person": id_person,
-            "address": address,
-            "balance": 0,
-        }
-        Login.insert_one(new_login)
+        login = Login.find({"username": username})
+        c = int(login.count())
+        if c > 0:
+            return render_template('signup/signup-fail.html', template=0)
+        else:
+            new_login = {
+                "fullname": fullname,
+                "username": username,
+                "password": password,
+                "level": 3,
+                "email": email,
+                "phone": phone,
+                "id_person": id_person,
+                "address": address,
+                "balance": 0,
+            }
+            Login.insert_one(new_login)
 
-        found_login = Login.find_one({'username': username})
-        gmail = GMail('ngovankhanh108@gmail.com', 'KhanhNgo108')
-        html_content = '''
-      Chúc mừng bạn đã tạo tài khoản thành công trên hệ thống.
-      Cảm ơn quý khách đã sử dụng dịch vụ của chúng tôi!
-      '''
-        msg = Message('Tạo tài khoản thành công',
-                      to=found_login['email'], html=html_content)
-        gmail.send(msg)
-        return redirect('/login')
+            found_login = Login.find_one({'username': username})
+            gmail = GMail('ngovankhanh108@gmail.com', 'KhanhNgo108')
+            html_content = '''
+            Chúc mừng bạn đã tạo tài khoản thành công trên hệ thống.
+            Cảm ơn quý khách đã sử dụng dịch vụ của chúng tôi!
+            '''
+            msg = Message('Tạo tài khoản thành công',
+                          to=found_login['email'], html=html_content)
+            gmail.send(msg)
+            return redirect('/login')
 
 # Thông tin cá nhân
 @app.route('/shipper_information')
@@ -604,8 +600,9 @@ def updateShipper(id):
 def requestShipper():
     all_order = Order.find(
         {'is_ordered': True, 'status': "Shipper chưa nhận đơn"})
-    if all_order is not None:
-        return render_template('shipper/ship-request.html', all_order=all_order, template=1)
+    c = int(all_order.count())
+    if c > 0:
+        return render_template('shipper/ship-request.html', template=1, all_order=all_order)
     else:
         return render_template('shipper/ship-request.html', template=0)
 
@@ -630,7 +627,8 @@ def requestDetail(order_id):
 def historyShipper():
     all_order = Order.find(
         {'shipper_id': session['shipper_id'], 'status': "User đã nhận hàng"})
-    if all_order is not None:
+    c = int(all_order.count())
+    if c > 0:
         return render_template('shipper/shipped-history.html', all_order=all_order, template=1)
     else:
         return render_template('shipper/shipped-history.html', template=0)
@@ -665,7 +663,8 @@ def shipper_accepted_order(order_id):
 def ship_status(status):
     found_order = Order.find(
         {'shipper_id': session['shipper_id'], 'status': status})
-    if found_order is not None:
+    c = int(found_order.count())
+    if c > 0:
         return render_template('shipper/ship-status.html', found_order=found_order, template=1)
     else:
         return render_template('shipper/ship-status.html', template=0)
