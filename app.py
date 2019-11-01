@@ -18,6 +18,21 @@ def index():
     return render_template('index.html')
 
 # Search
+# Title search
+@app.route('/searcht/searchTitle', methods=['GET', 'POST'])
+def searchT():
+    if request.method == "GET":
+        return render_template('search/searchName.html')
+    elif request.method == "POST":
+        form = request.form
+        productName = form['productName'].upper()
+        s = "^"+productName
+        all_product = Product.find({"name":{"$regex":s}})
+        c = int(all_product.count())
+        if c>0:
+            return render_template('search/search.html',all_product=all_product)
+        else:
+            return render_template('search/searchNone.html',template = 0)
 # Hiển thị danh sách sản phẩm
 @app.route('/search/<search>')
 def search(search):
@@ -37,7 +52,7 @@ def search_kids_info():
     product = Product.find({"product_kids": True})
     return render_template('search/search.html', all_product=product)
 
-
+# Searcg theo mẫu
 @app.route('/search_type/<search_type>')
 def search_type(search_type):
     session['search_type'] = search_type
@@ -97,7 +112,6 @@ def signUp():
             gmail.send(msg)
             return redirect('/login')
 
-
 # Đăng nhập phân quyền
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -147,7 +161,6 @@ def logout():
             return redirect('/')
     else:
         return redirect('/')
-
 
 # Update thông tin đăng nhập
 @app.route('/all_login/update/<id>', methods=['GET', 'POST'])
@@ -331,23 +344,34 @@ def addOrder(product_id):
 # Hiển thị giỏ hàng
 @app.route('/cart', methods=['GET', 'POST'])
 def cart():
-    found_order = Order.find_one(
-        {"user_id": session['user_id'], 'is_ordered': False, 'status': "Shipper chưa nhận đơn"})
-    if request.method == 'GET':
-        if found_order is not None:
-            cart = found_order
-            order_product = cart['product_id']
-            return render_template('user/cart.html', cart=cart, order_product=order_product, template=1)
+    if "loggedin" in session:
+        if session['loggedin'] == True:
+            if session['level_loggedin'] == "2":
+                found_order = Order.find_one(
+                    {"user_id": session['user_id'], 'is_ordered': False, 'status': "Shipper chưa nhận đơn"})
+                if request.method == 'GET':
+                    if found_order is not None:
+                        cart = found_order
+                        order_product = cart['product_id']
+                        return render_template('user/cart.html', cart=cart, order_product=order_product, template=1)
+                    else:
+                        return render_template('user/cart.html', template=0)
+                elif request.method == 'POST':
+                    form = request.form
+                    request_time = form['request_time']
+                    update = {"$set": {
+                        'request_time': request_time,
+                    }}
+                    Order.update_one(found_order, update)
+                return redirect('/cart')
+            elif session['level_loggedin'] == "3":
+                return redirect('/')
+            elif session['level_loggedin'] == "1":
+                return redirect('/')
         else:
-            return render_template('user/cart.html', template=0)
-    elif request.method == 'POST':
-        form = request.form
-        request_time = form['request_time']
-        update = {"$set": {
-            'request_time': request_time,
-        }}
-        Order.update_one(found_order, update)
-    return redirect('/cart')
+            return redirect('/login')
+    else:
+        return redirect('/login')
 
 # Xóa một sản phẩm khỏi giỏ hàng
 @app.route('/delete_product/<product_id>')
@@ -499,9 +523,6 @@ def order_history():
     else:
         return render_template('user/order-history.html', template=0)
 
-# Todo SHIPPER
-# Chức năng của shipper
-
 # Logout shipper login user
 @app.route('/logoutShipper_loginUser')
 def logoutShipper_loginUser():
@@ -519,6 +540,28 @@ def logoutShipper_loginUser():
             del session['shipper_id']
             del session['level_loggedin']
         return redirect('/login')
+
+# Logout admin login user
+@app.route('/logoutAdmin_loginUser')
+def logoutAdmin_loginUser():
+    if session['loggedin'] == False:
+        return redirect('/login')
+    else:
+        session['loggedin'] = False
+        if session['level_loggedin'] == "1":
+            del session['admin_id']
+            del session['level_loggedin']
+        elif session['level_loggedin'] == "2":
+            del session['user_id']
+            del session['level_loggedin']
+        elif session['level_loggedin'] == "3":
+            del session['shipper_id']
+            del session['level_loggedin']
+        return redirect('/login')
+
+
+# Todo SHIPPER
+# Chức năng của shipper
 
 # Đăng ký
 @app.route('/sign_up_shipper', methods=['GET', 'POST'])

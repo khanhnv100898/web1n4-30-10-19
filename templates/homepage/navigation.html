@@ -11,9 +11,9 @@
         </a>
     </div>
     <div class="col-md-4 d-flex justify-content-end align-items-center">
-        <a href="" class="fas fa-user f-s-icon-25px t-c-l-i-nav m-2"></a>
+        <a href="{{ url_for('homeLogin') }}" class="fas fa-user f-s-icon-25px t-c-l-i-nav m-2"></a>
         <a href="" class="far fa-heart f-s-icon-25px t-c-l-i-nav m-2 "></a>
-        <a href="" class="fas fa-shopping-cart f-s-icon-25px t-c-l-i-nav mr-5 ml-2"></a>
+        <a href="{{ url_for('cart') }}" class="fas fa-shopping-cart f-s-icon-25px t-c-l-i-nav mr-5 ml-2"></a>
     </div>
 </nav>
 <!-- Menu -->
@@ -24,7 +24,7 @@
                 <a class="nav-link text-up" href="{{ url_for('index') }}">Home</a>
             </li>
             <li class="nav-item ml-3">
-                <a class="nav-link text-up" href="#">About</a>
+                <a class="nav-link text-up" href="{{ url_for('searchT') }}">Search</a>
             </li>
             <li class="nav-item dropdown ml-3">
                 <a class="nav-link dropdown-toggle text-up" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

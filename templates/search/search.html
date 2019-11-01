@@ -30,12 +30,16 @@
                                 <a href="{{ url_for('productDetail', id=product._id) }}" class="btn btn-sm btn-dark font-text" style="font-size: 60%">Xem chi tiết</a>
                         {% elif session['level_loggedin'] == '3' %}
                             <a href="{{ url_for('logoutShipper_loginUser') }}" class="btn btn-sm btn-dark font-text" style="font-size: 60%">Đăng nhập User để mua hàng</a>
+                        {% elif session['level_loggedin'] == '1' %}
+                            <a href="{{ url_for('logoutAdmin_loginUser') }}" class="btn btn-sm btn-dark font-text" style="font-size: 60%">Đăng nhập User để mua hàng</a>
+                        {% else %}
+                            <a href="{{ url_for('login') }}" class="btn btn-sm btn-dark font-text" style="font-size: 60%">Đăng nhập User để mua hàng</a>
                         {% endif %}
                         </div>
                 </div>
             </div>
         {% endfor %}
-    </div>
+    </div>  
     {% include 'homepage/footer.html' %}
 </body>
 </html>

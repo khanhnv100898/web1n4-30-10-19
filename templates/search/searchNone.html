@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>KT</title>
+
+    {% include 'meta-data.html' %}
+    <!-- Trang hiển thị danh mục sản phẩm -->
+</head>
+<body>
+    {% include 'homepage/navigation.html' %}
+    {% if template == 0 %}
+        <div class="bg-dark" style="height: 700px; padding-top: 100px">
+            <h1 class="font-text text-light text-center">Không tìm thấy sản phẩm</h1>
+            <h1 class="font-text text-light text-center">Hãy quay lại tìm sản phẩm khác nhé</h1>
+            <div class="d-flex justify-content-center" style="margin-top: 100px">
+                <a href="{{ url_for('searchT') }}" class="btn btn-primary btn-lg font-text" role="button">Trở về</a>
+            </div>
+        </div>
+    {% endif %}
+    
+    {% include 'homepage/footer.html' %}
+</body>
+</html>
