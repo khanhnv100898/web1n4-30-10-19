@@ -34,7 +34,7 @@
                                     <div class="card-body bg-jumbotron border border-secondary">
                                         <h5 class="card-title font-text text-dark" style="font-size: 90%">{{ product.name }}</h5>
                                         <P class="card-text font-text text-dark" style="font-size: 70%">Loại: {{ product.product_type }}</P>
-                                        <p class="card-text font-text text-dark" style="font-size: 70%">Thương hiệu: {{ product.place }}</p>
+                                        <p class="card-text font-text text-dark" style="font-size: 70%">Thương hiệu: {{ product.brand }}</p>
                                         <p class="card-text font-text text-dark" style="font-size: 70%">Giá: {{ product.price }}$</p>
                                         <div class="d-flex flex-wrap justify-content-around">
                                             <a href="{{ url_for('productDetail', id=product._id) }}" class="btn btn-sm btn-dark font-text">Xem chi tiết</a>

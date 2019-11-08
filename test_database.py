@@ -1,5 +1,6 @@
 from pymongo import MongoClient
 from bson import ObjectId
+import random
 
 
 uri = "mongodb+srv://admin:admin@ttw-xlquo.mongodb.net/admin?retryWrites=true&w=majority"
@@ -37,22 +38,22 @@ Test = ttw_db["tests"]
 #         }
 #         Order.update_one(order,update)
 
-a = {
-    "_id":"1",
-    "name":"Khanh"
-}
-b = {
-    "_id":"2",
-    "name":"Khanh"
-}
-c = {
-    "_id":"3",
-    "name":"Khanh"
-}
-d = {
-    "_id":"4",
-    "name":"Khanh"
-}
+# a = {
+#     "_id":"1",
+#     "name":"Khanh"
+# }
+# b = {
+#     "_id":"2",
+#     "name":"Khanh"
+# }
+# c = {
+#     "_id":"3",
+#     "name":"Khanh"
+# }
+# d = {
+#     "_id":"4",
+#     "name":"Khanh"
+# }
 
 # ar=[a,b,c,d]
 
@@ -98,7 +99,12 @@ d = {
 
         # Order.update_one(order,update_order)
 
+# all_product = Product.find()
 
+# for i in all_product:
+#     _id = i['_id']
+#     update = {"$set":{"sold_count":random.randint(50,200)}}
+#     Product.update_one({'_id':ObjectId(_id)},update)
 
 
 

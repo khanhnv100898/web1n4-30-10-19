@@ -26,10 +26,17 @@
             </div>
             <div class="pt-3">
                 {% if session['level_loggedin'] == '2' %}
-                    <a href="{{ url_for('addOrder', product_id=detail_product._id) }}" class="btn btn-dark font-text">Thêm vào giỏ hàng</a>
-                    <a href="{{ url_for('cart') }}" class="btn btn-dark btn-sm font-text" role="button">Trở về giỏ hàng</a>
-                    <a href="{{ url_for('orderStatus') }}" class="btn btn-dark btn-sm font-text" role="button">Trở về đơn hàng</a>
+                    {% if detail_product.status == "Còn hàng" %}
+                        <a href="{{ url_for('addOrder', product_id=detail_product._id) }}" class="btn btn-dark font-text">Thêm vào giỏ hàng</a>
+                        <a href="{{ url_for('cart') }}" class="btn btn-dark btn-sm font-text" role="button">Trở về giỏ hàng</a>
+                        <a href="{{ url_for('orderStatus') }}" class="btn btn-dark btn-sm font-text" role="button">Trở về đơn hàng</a>
+                    {% elif detail_product.status == "Hết hàng" %}
+                        <button class="btn btn-dark font-text" disabled>Thêm vào giỏ hàng</button>
+                        <a href="{{ url_for('cart') }}" class="btn btn-dark btn-sm font-text" role="button">Trở về giỏ hàng</a>
+                        <a href="{{ url_for('orderStatus') }}" class="btn btn-dark btn-sm font-text" role="button">Trở về đơn hàng</a>
+                    {% endif %} 
                 {% endif %}
+                <!--  -->
                 {% if session['search'] %}
                     <a href="{{ url_for('search', search=session['search']) }}" class="btn btn-dark btn-sm font-text" role="button">Trở về tìm kiếm</a>
                 {% else %}

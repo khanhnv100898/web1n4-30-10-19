@@ -52,6 +52,13 @@ def search_kids_info():
     product = Product.find({"product_kids": True})
     return render_template('search/search.html', all_product=product)
 
+# Search bestselling
+@app.route('/searchbestselling')
+def search_best_selling():
+    all_product = Product.find({"sold_count":{"$gt":150}})
+    if all_product is not None:
+        return render_template('search/bestselling.html', all_product=all_product)
+
 # Searcg theo mẫu
 @app.route('/search_type/<search_type>')
 def search_type(search_type):
@@ -64,6 +71,10 @@ def search_type(search_type):
 @app.route('/product/detail/<id>')
 def productDetail(id):
     product = Product.find_one({"_id": ObjectId(id)})
+    view_ex = int(product['view'])
+    view_new = view_ex + 1
+    update = {"$set":{"view":view_new}}
+    Product.update_one({"_id":ObjectId(id)},update)
     return render_template('search/detail.html', detail_product=product)
 
 # Đăng ký
@@ -285,6 +296,11 @@ def addOrder(product_id):
                         order_fee = int(found_product['price'])+int(ex_fee)
                         ship_fee = 0.1 * \
                             int(int(found_product['price'])+int(ex_fee))
+                        # Tăng số lượng đã bán của sản phẩm
+                        sold_count_ex = int(found_product['sold_count'])
+                        sold_count_new = sold_count_ex + 1
+                        update_product2 = {"$set":{"sold_count":sold_count_new}}
+                        Product.update_one(found_product,update_product2)
                         #  Cập nhật giá tiền mới
                         found_order_update_2 = {"$set": {
                             "order_time": datetime.now(),
@@ -308,6 +324,12 @@ def addOrder(product_id):
                         a = "/search/" + b
                         return redirect(a)
                     else:
+                        # Tăng số lượng đã bán của sản phẩm
+                        sold_count_ex = int(found_product['sold_count'])
+                        sold_count_new = sold_count_ex + 1
+                        update_product2 = {"$set":{"sold_count":sold_count_new}}
+                        Product.update_one(found_product,update_product2)
+                        # Tạo 1 đơn mới
                         add_order = {
                             "user_id": session['user_id'],
                             "product_id": [{
@@ -331,7 +353,9 @@ def addOrder(product_id):
                             "shipper_id": "null",
                         }
                         Order.insert_one(add_order)
-                        return redirect('/')
+                        b = session['search']
+                        a = "/search/" + b
+                        return redirect(a)
                 else:
                     return 'Not found'
             else:
@@ -379,22 +403,39 @@ def delete_product(product_id):
     order = Order.find_one(
         {'user_id': session['user_id'], 'is_ordered': False, 'status': "Shipper chưa nhận đơn"})
 
-    product = Product.find_one({"_id": ObjectId(product_id)})
+    c = order['product_id']
+    if len(c) > 1:
+    
+        product = Product.find_one({"_id": ObjectId(product_id)})
+        # Giảm số lượng đã bán của sản phẩm
+        sold_count_ex = int(product['sold_count'])
+        sold_count_new = sold_count_ex - 1
+        update_product2 = {"$set":{"sold_count":sold_count_new}}
+        Product.update_one(product,update_product2)
+        # Xóa 1 sản phẩm
+        Order.update_one(
+            {'_id': ObjectId(order['_id'])},
+            {'$pull': {"product_id": {'_id': ObjectId(product_id)}}},
+        )
 
-    Order.update_one(
-        {'_id': ObjectId(order['_id'])},
-        {'$pull': {"product_id": {'_id': ObjectId(product_id)}}},
-    )
-
-    order_fee_ex = int(order['order_fee'])
-    product_price = int(product['price'])
-    new_order_fee = int(order_fee_ex) - int(product_price)
-    new_ship_fee = (0.1 * new_order_fee)
-    Order.update_one(
-        {'_id': ObjectId(order['_id'])},
-        {'$set': {"order_fee": new_order_fee, "ship_fee": new_ship_fee}},
-    )
-    return redirect('/cart')
+        order_fee_ex = int(order['order_fee'])
+        product_price = int(product['price'])
+        new_order_fee = int(order_fee_ex) - int(product_price)
+        new_ship_fee = (0.1 * new_order_fee)
+        Order.update_one(
+            {'_id': ObjectId(order['_id'])},
+            {'$set': {"order_fee": new_order_fee, "ship_fee": new_ship_fee}},
+        )
+        return redirect('/cart')
+    elif len(c) == 1:
+        product = Product.find_one({"_id": ObjectId(product_id)})
+        # Giảm số lượng đã bán của sản phẩm
+        sold_count_ex = int(product['sold_count'])
+        sold_count_new = sold_count_ex - 1
+        update_product2 = {"$set":{"sold_count":sold_count_new}}
+        Product.update_one(product,update_product2)
+        Order.delete_one(order)
+        return redirect('/cart')
 
 # Gửi yêu cầu mua đơn hàng
 @app.route('/ordered/<order_id>')
@@ -449,7 +490,8 @@ def orderStatus():
 def orderStatusReceiver():
     all_order = Order.find({'user_id': session['user_id'], 'is_ordered': True,
                             "status": "Shipper đã nhận hàng, bắt đầu tiến hành vận chuyển"})
-    if all_order is not None:
+    c = int(all_order.count())
+    if c > 0:
         return render_template('user/order-status.html', all_order=all_order, template=1)
     else:
         return render_template('user/order-status.html', template=0)
@@ -890,9 +932,81 @@ def output_excel():
         i = i + 1
         #
         data.append(list_login)
-    pyexcel.save_as(records=data, dest_file_name="TestLogins.xlsx")
+    pyexcel.save_as(records=data, dest_file_name="Logins.xlsx")
     return "Done"
 
+# Xuất file Excel products
+@app.route('/output_product_excel')
+def output_product_excel():
+    all_product = Product.find()
+    data =[]
+    i = 0
+    for product in all_product:
+        list_product = {}
+        # 
+        index = i
+        _id = product['_id']
+        image = product['image']
+        name = product['name']
+        description = product['description']
+        price = product['price']
+        status = product['status']
+        brand = product['brand']
+        product_type = product['product_type']
+        product_gender = product['product_gender']
+        #
+        list_product['STT'] = index
+        list_product['ID'] = _id
+        list_product['Name'] = name
+        list_product['Description'] = description
+        list_product['Price'] = price
+        list_product['Status'] = status
+        list_product['Brand'] = brand
+        list_product['Type'] = product_type
+        list_product['Gender'] = product_gender
+        i = i +1
+        # 
+        data.append(list_product)
+    pyexcel.save_as(records=data, dest_file_name="Products.xlsx")
+    return "Done"
+
+#  Xuất file Order
+@app.route('/output_orders_excel')
+def output_order_excel():
+    all_order = Order.find()
+    data = []
+    i =0
+    for order in all_order:
+        list_order = {}
+        # 
+        index = i
+        _id = order['_id']
+        user_id = order['user_id']
+        address = order['address']
+        order_time = order['order_time']
+        order_fee = order['order_fee']
+        ship_fee = order['ship_fee']
+        is_ordered = order['is_ordered']
+        status = order['status']
+        shipper_id = order['shipper_id']
+        # 
+        list_order['STT'] = index
+        list_order['ID'] = _id
+        list_order['User ID'] = user_id
+        list_order['Address'] = address
+        list_order['Order Time'] = order_time
+        list_order['Order Fee'] = order_fee
+        list_order['Ship Fee'] = ship_fee
+        list_order['Is Ordered'] = is_ordered
+        list_order['Status'] = status
+        list_order['Shipper ID'] = shipper_id
+        i = i+ 1
+        
+        # 
+        data.append(list_order)
+    pyexcel.save_as(records=data, dest_file_name="Orders.xlsx")
+
+    return "Done"
 
 if __name__ == '__main__':
     app.run(debug=True)

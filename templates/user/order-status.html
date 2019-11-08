@@ -34,7 +34,7 @@
                                 <div class="card-body bg-jumbotron border border-secondary">
                                     <h5 class="card-title font-text text-dark" style="font-size: 90%">{{ product.name }}</h5>
                                     <P class="card-text font-text text-dark" style="font-size: 70%">Loại: {{ product.product_type }}</P>
-                                    <p class="card-text font-text text-dark" style="font-size: 70%">Thương hiệu:</p>
+                                    <p class="card-text font-text text-dark" style="font-size: 70%">Thương hiệu: {{ product.brand }}</p>
                                     <p class="card-text font-text text-dark" style="font-size: 70%">Giá: {{ product.price }}$</p>
                                     <div class="d-flex flex-wrap justify-content-around">
                                         <a href="" class="btn btn-sm btn-dark font-text">Xem chi tiết</a>
@@ -96,7 +96,7 @@
             <h1 class="font-text text-light text-center">Bạn chưa gửi yêu cầu mua hàng</h1>
             <h1 class="font-text text-light text-center">Hãy quay lại chọn sản phẩm nhé</h1>
             <div class="d-flex justify-content-center" style="margin-top: 100px">
-                <a href="{{ url_for('homeLogin') }}" class="btn btn-primary btn-lg font-text" role="button">Trở về</a>
+                <a href="{{ url_for('user_status_select') }}" class="btn btn-primary btn-lg font-text" role="button">Trở về</a>
             </div>
         </div>
     {% endif %}

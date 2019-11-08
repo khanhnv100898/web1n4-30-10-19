@@ -10,14 +10,16 @@ ttw_db = client.ttw_app
 Product = ttw_db["products"]
 
 # new_Product = {
-#     "image": "https://assets.adidas.com/images/h_600,f_auto,q_auto,fl_lossy/e65d468b91a64c45b753a84e0101decd_9366/Galaxy_Away_Jersey_Blue_BS4993_01_laydown.jpg",
-#     "name": "Galaxy Away Jersey KNV456",
-#     "description": "Galaxy rule the game with a one-two punch of lightning-quick pace and strong attacking power. Honor the star-stacked squad from LA in this junior boys' soccer jersey. Styled after the team's away uniform, the jersey features an LA Galaxy badge on the chest plus ventilated climacool®.",
+#     "image": "https://assets.adidas.com/images/h_600,f_auto,q_auto,fl_lossy/c53668fe225a4e11a98da82500cb60a0_9366/Ultraboost_Shoes_White_BB6308_01_standard.jpg",
+#     "name": "NMD_R1 Shoes Grey ",
+#     "description": "Stride out in a minimalist technical style. These NMD shoes bring a modern attitude to 80s racing heritage. These knit sneakers are built for a sock-like fit. Boost cushioning provides a responsive, energized feel.",
 #     "price": 75,
-#     "status": "Còn hàng",
+#     "status": "Hết hàng",
 #     "brand": "Adidas",
-#     "product_type": "Áo",
-#     "product_gender": "Girl",
-#     "product_kids": True,
+#     "product_type": "Giầy",
+#     "product_gender": "Women",
+#     "product_kids": False,
+#     "view":34,
+#     "sold_count":45,
 # }
 # Product.insert_one(new_Product)
