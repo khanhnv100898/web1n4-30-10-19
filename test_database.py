@@ -9,6 +9,7 @@ client = MongoClient(uri)
 
 ttw_db = client.ttw_app
 
+Login = ttw_db["logins"]
 Order = ttw_db["orders"]
 Product = ttw_db["products"]
 Test = ttw_db["tests"]

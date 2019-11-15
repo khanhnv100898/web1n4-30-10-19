@@ -2,11 +2,19 @@ from bson import ObjectId
 from flask import Flask, render_template, request, redirect, session
 from gmail import *
 from datetime import datetime
-from models.product import Product
-from models.login import Login
-from models.order import Order
 import pyexcel
 from pymongo import MongoClient
+from bson import ObjectId
+
+uri = "mongodb+srv://admin:admin@ttw-xlquo.mongodb.net/admin?retryWrites=true&w=majority"
+
+client = MongoClient(uri)
+ttw_db = client.ttw_app
+
+
+Login = ttw_db["logins"]
+Order = ttw_db["orders"]
+Product = ttw_db["products"]
 
 
 app = Flask(__name__)
