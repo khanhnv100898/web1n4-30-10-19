@@ -33,7 +33,7 @@
                     <td class="balance">{{ login.balance }}</td>
                     <td>
                         <a href="{{ url_for('deleteLogin',id=login._id) }}">Xóa</a>
-                        <a href="{{ url_for('updateLogin',id = login._id) }}">Sửa</a>
+                        <a href="{{ url_for('editLoginsAdmin',id = login._id) }}">Sửa</a>
                     </td>
                 {% endfor %}
             </tr>

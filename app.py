@@ -5,6 +5,8 @@ from datetime import datetime
 import pyexcel
 from pymongo import MongoClient
 from bson import ObjectId
+from docx import Document
+from docx.shared import Inches
 
 uri = "mongodb+srv://admin:admin@ttw-xlquo.mongodb.net/admin?retryWrites=true&w=majority"
 
@@ -18,7 +20,7 @@ Product = ttw_db["products"]
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'sdasdasd23423@#4'
+app.config['SECRET_KEY'] = 'sdasdđâsdasasd23423@#4'
 
 # Trang chủ
 @app.route('/')
@@ -35,12 +37,13 @@ def searchT():
         form = request.form
         productName = form['productName'].upper()
         s = "^"+productName
-        all_product = Product.find({"name":{"$regex":s}})
+        all_product = Product.find({"name": {"$regex": s}})
         c = int(all_product.count())
-        if c>0:
-            return render_template('search/search.html',all_product=all_product)
+        if c > 0:
+            return render_template('search/search.html', all_product=all_product)
         else:
-            return render_template('search/searchNone.html',template = 0)
+            return render_template('search/searchNone.html', template=0)
+            
 # Hiển thị danh sách sản phẩm
 @app.route('/search/<search>')
 def search(search):
@@ -63,7 +66,7 @@ def search_kids_info():
 # Search bestselling
 @app.route('/searchbestselling')
 def search_best_selling():
-    all_product = Product.find({"sold_count":{"$gt":150}})
+    all_product = Product.find({"sold_count": {"$gt": 150}})
     if all_product is not None:
         return render_template('search/bestselling.html', all_product=all_product)
 
@@ -81,8 +84,8 @@ def productDetail(id):
     product = Product.find_one({"_id": ObjectId(id)})
     view_ex = int(product['view'])
     view_new = view_ex + 1
-    update = {"$set":{"view":view_new}}
-    Product.update_one({"_id":ObjectId(id)},update)
+    update = {"$set": {"view": view_new}}
+    Product.update_one({"_id": ObjectId(id)}, update)
     return render_template('search/detail.html', detail_product=product)
 
 # Đăng ký
@@ -307,8 +310,9 @@ def addOrder(product_id):
                         # Tăng số lượng đã bán của sản phẩm
                         sold_count_ex = int(found_product['sold_count'])
                         sold_count_new = sold_count_ex + 1
-                        update_product2 = {"$set":{"sold_count":sold_count_new}}
-                        Product.update_one(found_product,update_product2)
+                        update_product2 = {
+                            "$set": {"sold_count": sold_count_new}}
+                        Product.update_one(found_product, update_product2)
                         #  Cập nhật giá tiền mới
                         found_order_update_2 = {"$set": {
                             "order_time": datetime.now(),
@@ -335,8 +339,9 @@ def addOrder(product_id):
                         # Tăng số lượng đã bán của sản phẩm
                         sold_count_ex = int(found_product['sold_count'])
                         sold_count_new = sold_count_ex + 1
-                        update_product2 = {"$set":{"sold_count":sold_count_new}}
-                        Product.update_one(found_product,update_product2)
+                        update_product2 = {
+                            "$set": {"sold_count": sold_count_new}}
+                        Product.update_one(found_product, update_product2)
                         # Tạo 1 đơn mới
                         add_order = {
                             "user_id": session['user_id'],
@@ -413,13 +418,13 @@ def delete_product(product_id):
 
     c = order['product_id']
     if len(c) > 1:
-    
+
         product = Product.find_one({"_id": ObjectId(product_id)})
         # Giảm số lượng đã bán của sản phẩm
         sold_count_ex = int(product['sold_count'])
         sold_count_new = sold_count_ex - 1
-        update_product2 = {"$set":{"sold_count":sold_count_new}}
-        Product.update_one(product,update_product2)
+        update_product2 = {"$set": {"sold_count": sold_count_new}}
+        Product.update_one(product, update_product2)
         # Xóa 1 sản phẩm
         Order.update_one(
             {'_id': ObjectId(order['_id'])},
@@ -440,8 +445,8 @@ def delete_product(product_id):
         # Giảm số lượng đã bán của sản phẩm
         sold_count_ex = int(product['sold_count'])
         sold_count_new = sold_count_ex - 1
-        update_product2 = {"$set":{"sold_count":sold_count_new}}
-        Product.update_one(product,update_product2)
+        update_product2 = {"$set": {"sold_count": sold_count_new}}
+        Product.update_one(product, update_product2)
         Order.delete_one(order)
         return redirect('/cart')
 
@@ -488,7 +493,8 @@ def ordered(order_id):
 def orderStatus():
     all_order = Order.find(
         {'user_id': session['user_id'], 'is_ordered': True, 'shipper_id': "null"})
-    if all_order is not None:
+    c = int(all_order.count())
+    if c > 0:
         return render_template('user/order-status.html', all_order=all_order, template=1)
     else:
         return render_template('user/order-status.html', template=0)
@@ -608,7 +614,6 @@ def logoutAdmin_loginUser():
             del session['shipper_id']
             del session['level_loggedin']
         return redirect('/login')
-
 
 # Todo SHIPPER
 # Chức năng của shipper
@@ -820,14 +825,14 @@ def allProduct():
 def deleteProduct(id):
     product = Product.find_one({"_id": ObjectId(id)})
     Product.delete_one(product)
-    return redirect('/all_product')
+    return redirect('/all_product_admin')
 
 # Sửa sản phẩm
 @app.route('/all_product/update_product/<id>', methods=['GET', 'POST'])
 def updateProduct(id):
     product = Product.find_one({"_id": ObjectId(id)})
     if request.method == 'GET':
-        return render_template('update_product.html', product=product)
+        return render_template('admin/update_product.html', product=product)
     elif request.method == 'POST':
         form = request.form
 
@@ -853,13 +858,13 @@ def updateProduct(id):
             "product_kids": product_kids,
         }}
         Product.update_one(product, update_product)
-        return redirect('/all_product')
+        return redirect('/all_product_admin')
 
 # Thêm sản phẩm
 @app.route('/add_product', methods=['GET', 'POST'])
 def addProduct():
     if request.method == 'GET':
-        return render_template('add_product.html')
+        return render_template('admin/add_product.html')
     elif request.method == 'POST':
         form = request.form
 
@@ -883,26 +888,18 @@ def addProduct():
             "product_type": product_type,
             "product_gender": product_gender,
             "product_kids": product_kids,
+            "view":1,
+            "sold_count":1,
         }
 
         Product.insert_one(new_product)
-        return redirect('/all_product')
+        return redirect('/all_product_admin')
 
 # Quản lý tài khoản
 @app.route('/all_login')
 def allLogin():
     all_login = Login.find()
-    # Tổng số bản ghi
-    count_all_login = Login.count()
-    # Số bản ghi max trên 1 trang
-    maxA = 2
-    # Tổng số trang
-    all_page = count_all_login / maxA
-    # Trang hiện thời
-    current_page = 1
-    # Start
-    start = (current_page - 1) * maxA
-    return render_template('admin/all_login.html', all_login=all_login, count_all_login=count_all_login, maxA=maxA, all_page=all_page, current_page=current_page, start=start)
+    return render_template('admin/all_login.html', all_login=all_login)
 
 # Xóa tài khoản
 @app.route('/all_login/delete/<id>')
@@ -910,6 +907,29 @@ def deleteLogin(id):
     login = Login.find_one({"_id": ObjectId(id)})
     Login.delete_one(login)
     return redirect('/all_login')
+
+# Sửa tài khoản
+@app.route('/edit_logins_admin/<id>', methods=['GET', 'POST'])
+def editLoginsAdmin(id):
+    login = Login.find_one({"_id":ObjectId(id)})
+    if request.method == "GET":
+        return render_template('admin/update_account.html',login = login)
+    elif request.method =="POST":
+        form = request.form
+
+        update = {"$set":{
+            'fullname' : form['fullname'],
+            'username' : form['username'],
+            'password' : form['password'],
+            'level ': form['level'],
+            'email' : form['email'],
+            'phone' : form['phone'],
+            'address' : form['address'],
+            'balance' : form['balance'],
+        }}
+
+        Login.update_one(login,update)
+        return redirect('/all_login')
 
 # Xuất file Excel Account
 @app.route('/output_excel')
@@ -947,11 +967,11 @@ def output_excel():
 @app.route('/output_product_excel')
 def output_product_excel():
     all_product = Product.find()
-    data =[]
+    data = []
     i = 0
     for product in all_product:
         list_product = {}
-        # 
+        #
         index = i
         _id = product['_id']
         image = product['image']
@@ -972,8 +992,8 @@ def output_product_excel():
         list_product['Brand'] = brand
         list_product['Type'] = product_type
         list_product['Gender'] = product_gender
-        i = i +1
-        # 
+        i = i + 1
+        #
         data.append(list_product)
     pyexcel.save_as(records=data, dest_file_name="Products.xlsx")
     return "Done"
@@ -983,10 +1003,10 @@ def output_product_excel():
 def output_order_excel():
     all_order = Order.find()
     data = []
-    i =0
+    i = 0
     for order in all_order:
         list_order = {}
-        # 
+        #
         index = i
         _id = order['_id']
         user_id = order['user_id']
@@ -997,7 +1017,7 @@ def output_order_excel():
         is_ordered = order['is_ordered']
         status = order['status']
         shipper_id = order['shipper_id']
-        # 
+        #
         list_order['STT'] = index
         list_order['ID'] = _id
         list_order['User ID'] = user_id
@@ -1008,13 +1028,51 @@ def output_order_excel():
         list_order['Is Ordered'] = is_ordered
         list_order['Status'] = status
         list_order['Shipper ID'] = shipper_id
-        i = i+ 1
-        
-        # 
+        i = i + 1
+
+        #
         data.append(list_order)
     pyexcel.save_as(records=data, dest_file_name="Orders.xlsx")
 
     return "Done"
+
+# Xuất hóa đơn ra Word
+@app.route('/output_bill_word/<id>')
+def output_bill_word(id):
+
+    order = Order.find_one({"_id":ObjectId(id)})
+    all_product =order['product_id']
+    user = Login.find_one({"_id":ObjectId(order['user_id'])})
+
+    document = Document()
+
+    document.add_heading('Hóa đơn bán hàng', 0)
+
+    document.add_heading("Tên khách hàng:  " + user['fullname'], level=1)
+
+    index = 1
+    for i in all_product:
+        name = i['name']
+        price = str(i['price'])
+
+        s = "Sản phẩm " + str(index) + " :  " + name + "             " + price+"$"
+        document.add_paragraph(s, style='Intense Quote')
+        index += 1
+
+    document.add_paragraph("Địa chỉ:  " + order['address'], style='Intense Quote')
+    document.add_paragraph(
+        "Phí ship:  " + str(order['ship_fee']), style='Intense Quote')
+    document.add_paragraph("Tổng tiền hàng : " +
+                        str(order['order_fee']), style='Intense Quote')
+    totalPrice = int(order['ship_fee']) + int(order['order_fee'])
+    document.add_paragraph("Tổng thanh toán:  " +
+                        str(totalPrice), style='Intense Quote')
+
+    document.add_page_break()
+
+    document.save('demoWord.docx')
+    return "Done"
+
 
 if __name__ == '__main__':
     app.run(debug=True)

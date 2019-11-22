@@ -7,40 +7,41 @@
     <title>KT</title>
 </head>
 <body>
-        <table border="1px" align="center" >
-            <thead>
-                <th>STT</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Price</th>
-                <th>Status</th>
-                <th>Brand</th>
-                <th>Type</th>
-                <th>Gender</th>
-                <th>Kids</th>
-            </thead>    
-            <tbody class='ul1'>
-                {% for product in all_product %}
-                    <tr>
-                        <td class="index">{{ loop.index }}</td>
-                        <td class="fname">{{ product.name }}</td>
-                        <td class="uname">{{ product.description }}</td>
-                        <td class="pass">{{ product.price }}</td>
-                        <td class="lv">{{ product.status }}</td>
-                        <td class="em">{{ product.brand }}</td>
-                        <td class="phone">{{ product.product_type }}</td>
-                        <td class="address">{{ product.product_gender }}</td>
-                        <td class="balance">{{ product.product_kids }}</td>
-                        <td>
-                            <a href="{{ url_for('productDetail',id = product._id) }}">Chi tiết</a>
-                            <a href="{{ url_for('deleteProduct',id = product._id) }}">Xóa</a>
-                            <a href="{{ url_for('updateProduct',id = product._id) }}">Chỉnh sửa</a>
-                        </td>
-                {% endfor %}
-                    </tr>
-            </tbody>
-        </table>
-    <a href="">Xuất file Excel</a>
+    <a href="{{ url_for('output_product_excel') }}">Xuất file Excel</a>
+    <a href="{{ url_for('addProduct') }}">Thêm sản phẩm</a>
     <hr> 
+    <table border="1px" align="center" >
+        <thead>
+            <th>STT</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Brand</th>
+            <th>Type</th>
+            <th>Gender</th>
+            <th>Kids</th>
+        </thead>    
+        <tbody class='ul1'>
+            {% for product in all_product %}
+                <tr>
+                    <td class="index">{{ loop.index }}</td>
+                    <td class="fname">{{ product.name }}</td>
+                    <td class="uname">{{ product.description }}</td>
+                    <td class="pass">{{ product.price }}</td>
+                    <td class="lv">{{ product.status }}</td>
+                    <td class="em">{{ product.brand }}</td>
+                    <td class="phone">{{ product.product_type }}</td>
+                    <td class="address">{{ product.product_gender }}</td>
+                    <td class="balance">{{ product.product_kids }}</td>
+                    <td>
+                        <a href="{{ url_for('productDetail',id = product._id) }}">Chi tiết</a>
+                        <a href="{{ url_for('deleteProduct',id = product._id) }}">Xóa</a>
+                        <a href="{{ url_for('updateProduct',id = product._id) }}">Chỉnh sửa</a>
+                    </td>
+            {% endfor %}
+                </tr>
+        </tbody>
+    </table>
 </body>
 </html>
