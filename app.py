@@ -8,12 +8,15 @@ from bson import ObjectId
 from docx import Document
 from docx.shared import Inches
 
+# uri để kết nối đến database
 uri = "mongodb+srv://admin:admin@ttw-xlquo.mongodb.net/admin?retryWrites=true&w=majority"
 
+# thực hiện kết nối
 client = MongoClient(uri)
+# get data
 ttw_db = client.ttw_app
 
-
+# get collection
 Login = ttw_db["logins"]
 Order = ttw_db["orders"]
 Product = ttw_db["products"]
@@ -25,7 +28,7 @@ app.config['SECRET_KEY'] = 'sdasdđâsdasasd23423@#4'
 # Trang chủ
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html') # trả về trang index.html
 
 # Search
 # Title search
@@ -138,41 +141,41 @@ def signUp():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        return render_template('logins/login-user.html')
+        return render_template('logins/login-user.html')  # trả về html khi người dùng yêu cầu
     elif request.method == 'POST':
-        form = request.form
+        form = request.form 
         login_username = form['username']
         login_password = form['password']
-        login = Login.find_one({'username': login_username})
-        if login is None:
-            return render_template('logins/login-fail.html')
-        else:
-            if login_password == login['password']:
-                session['loggedin'] = True
-                session['level_loggedin'] = str((login['level']))
-
-                if session['level_loggedin'] == "2":
-                    session["user_id"] = str(login["_id"])
-                    return render_template('user.html', login=login)
-                elif session['level_loggedin'] == "1":
+        login = Login.find_one({'username': login_username}) # tìm kiếm username có trong database
+        if login is None:  # nếu không tìm thấy username
+            return render_template('logins/login-fail.html') # thông báo đăng nhập không thành công
+        else: 
+            if login_password == login['password']: # so sánh password người dùng nhập với password trong database nếu trùng thì đăng nhập
+                session['loggedin'] = True # lưu phiên đăng nhập
+                session['level_loggedin'] = str((login['level'])) # lưu phiên thông tin level của người đăng nhập
+                # phân quyền đăng nhập
+                if session['level_loggedin'] == "2": # user level = 2, lưu vào phiên đăng nhập
+                    session["user_id"] = str(login["_id"]) # lưu session id  = id của user đăng nhập
+                    return render_template('user.html', login=login) # trả về html và truyền login sang html
+                elif session['level_loggedin'] == "1":# level = 1 sẽ là admin
                     session["admin_id"] = str(login["_id"])
                     return render_template('admin.html', login=login)
-                elif session['level_loggedin'] == "3":
+                elif session['level_loggedin'] == "3": #level sẽ là shipper
                     session["shipper_id"] = str(login["_id"])
                     return render_template('shipper.html', login=login)
             else:
-                return render_template('logins/login-fail.html')
+                return render_template('logins/login-fail.html') # nếu password sai, trả về Login Fail
 
 # Đăng xuất
 @app.route('/logout')
 def logout():
-    if "loggedin" in session:
-        if session['loggedin'] == False:
+    if "loggedin" in session: # nếu tồn tại phiên trong session
+        if session['loggedin'] == False:  # đã đăng xuất thì trả về trang chủ
             return redirect('/')
         else:
-            session['loggedin'] = False
-            if session['level_loggedin'] == "1":
-                del session['admin_id']
+            session['loggedin'] = False # phiên bằng false và kiểm tra level đang đăng nhập và thực hiện xóa phiên
+            if session['level_loggedin'] == "1": # thực hiện kiểm tra phiên đăng nhập 
+                del session['admin_id']  # thực hiện xóa session để dăng xuất tài khoản
                 del session['level_loggedin']
             elif session['level_loggedin'] == "2":
                 del session['user_id']
@@ -182,21 +185,22 @@ def logout():
                 del session['level_loggedin']
             return redirect('/')
     else:
-        return redirect('/')
+        return redirect('/') 
 
 # Update thông tin đăng nhập
-@app.route('/all_login/update/<id>', methods=['GET', 'POST'])
-def updateLogin(id):
-    login = Login.find_one({"_id": ObjectId(id)})
-    if request.method == 'GET':
-        return render_template('update_login.html', login=login)
-    elif request.method == 'POST':
-        form = request.form
-        fullname = form['fullname']
+@app.route('/all_login/update/<id>', methods=['GET', 'POST']) # <id> sẽ được truyền vào bằng id của document(bản ghi)
+def updateLogin(id): # thực hiện hàm update với 1 tham số id được truyền vào
+    login = Login.find_one({"_id": ObjectId(id)}) # thực hiện tìm kiếm trường "_id" trong collection với tham số id được truyền vào 
+    if request.method == 'GET': 
+        return render_template('update_login.html', login=login) # trả về trang update truyền document vừa tìm được sang html
+    elif request.method == 'POST': # nếu người dùng thực hiện gửi dữ liệu, thực hiện lấy dữ liệu
+        form = request.form     # lấy dữ liệu từ form
+        fullname = form['fullname'] # gán dữ liệu ở form vào biến
         username = form['username']
         password = form['password']
         level = form['level']
 
+        # update database
         update_login = {"$set": {
             "fullname": fullname,
             "username": username,
@@ -235,16 +239,16 @@ def updateLoginUser(id):
         return redirect('/homeLogin')
 
 # Giao diện Information
-@app.route('/homeLogin')
-def homeLogin():
+@app.route('/homeLogin') 
+def homeLogin():        # hàm giao diện của tài khoản khi đăng nhập
     if "loggedin" in session:
-        if session['loggedin'] == True:
-            if session['level_loggedin'] == "2":
-                return render_template('user.html')
+        if session['loggedin'] == True: # khi có phiên đăng nhập tồn tại, thực hiện kiểm tra 
+            if session['level_loggedin'] == "2": 
+                return render_template('user.html') # trả về trang user nếu session == 2
             elif session['level_loggedin'] == "1":
-                return render_template('admin.html')
+                return render_template('admin.html')# trả về trang admin nếu session == 1
             elif session['level_loggedin'] == "3":
-                return render_template('shipper.html')
+                return render_template('shipper.html')# trả về trang shipper nếu session == 3
         else:
             return redirect('/login')
     return redirect('/login')
@@ -273,16 +277,17 @@ def userInformation():
 
 # Nạp tiền cho tài khoản User
 @app.route('/add_money_user', methods=['GET', 'POST'])
-def addMoneyUser():
-    user_login = Login.find_one({"_id": ObjectId(session["user_id"])})
+def addMoneyUser(): # hàm nạp tiền cho tài khoản user
+    user_login = Login.find_one({"_id": ObjectId(session["user_id"])}) # thực hiện tìm kiếm tài khoản đang đăng nhập với id lưu session
     if request.method == 'GET':
         return render_template('user/add-money.html', found_user=user_login)
     elif request.method == 'POST':
         form = request.form
-        money = int(form['money'])
-        ex_money = int(user_login['balance'])
-        balance = money + ex_money
+        money = int(form['money']) # lấy số tiền user nhập muốn nạp
+        ex_money = int(user_login['balance']) # lấy số tiền hiện có trong tài khoản của user
+        balance = money + ex_money # tính total bằng số tiền cũ + số tiền user nhập
 
+        # thực hiện update số tiền trong tài khoản
         add_money = {"$set": {
             "balance": balance,
         }}
@@ -1048,6 +1053,13 @@ def output_bill_word(id):
 
     document.add_heading('Hóa đơn bán hàng', 0)
 
+    date = order['order_time']
+    day = str(date.day)
+    month = str(date.month)
+    year = str(date.year)
+    document.add_heading('Ngày ' + day+"/"+month+"/"+year, 0)
+
+
     document.add_heading("Tên khách hàng:  " + user['fullname'], level=1)
 
     index = 1
@@ -1071,8 +1083,15 @@ def output_bill_word(id):
     document.add_page_break()
 
     document.save('demoWord.docx')
-    return "Done"
+    return "done"
 
+
+
+# TODO
+@app.route('/all_order')
+def allOrder():
+    all_order = Order.find()
+    return render_template('admin/all_order.html',all_order = all_order)
 
 if __name__ == '__main__':
     app.run(debug=True)

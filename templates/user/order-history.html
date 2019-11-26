@@ -55,6 +55,9 @@
                                     <p class="font-text">Tổng đơn hàng: {{ order.order_fee + order.ship_fee }}$</p>
                                     <p class="font-text">Địa chỉ nhận hàng: {{ order.address }}</p>
                                     <p class="font-text">Thời gian yêu cầu: {{ order.request_time if order.request_time else 'Giao hàng bất cứ lúc nào'}}</p>
+                                    <div class="d-flex justify-content-center" style="margin-top: 100px">
+                                        <a href="{{ url_for('output_bill_word', id = order._id) }}" class="btn btn-primary btn-lg font-text" role="button">In hóa đơn</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>

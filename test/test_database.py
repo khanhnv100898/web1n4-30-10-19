@@ -2,13 +2,13 @@ from pymongo import MongoClient
 from bson import ObjectId
 import random
 
-
+# Link database
 uri = "mongodb+srv://admin:admin@ttw-xlquo.mongodb.net/admin?retryWrites=true&w=majority"
-
+# Kết nối Database
 client = MongoClient(uri)
-
+# Creat CLUSTERS
 ttw_db = client.ttw_app
-
+# Creat COLLECTION
 Login = ttw_db["logins"]
 Order = ttw_db["orders"]
 Product = ttw_db["products"]
