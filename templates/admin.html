@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>KT</title>
 
+    <!-- include là lấy tất cả code từ file meta-data.html xuất hiện ở đây -->
     {% include 'meta-data.html' %}    
     <!-- Giao diện chính của User -->
 </head>
@@ -15,6 +16,7 @@
         <div class="w-20p container">
             <img src="../static/images/icon-admin/alluser.png" class="image">
             <div class="middle">
+                <!-- url_for là thực hiện hàm được viết từ bên file app.py -->
                 <a class="text btn btn-lg active" href="{{ url_for('allOrder') }}">Quản lý tài khoản</a>
             </div>
         </div>
