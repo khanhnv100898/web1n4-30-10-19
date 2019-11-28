@@ -212,11 +212,12 @@ def updateLogin(id): # thực hiện hàm update với 1 tham số id được t
 
 # Update thông tin đăng nhập User
 @app.route('/update/<id>', methods=['GET', 'POST'])
-def updateLoginUser(id):
-    login = Login.find_one({"_id": ObjectId(id)})
+def updateLoginUser(id): # hàm update thông tin của user
+    login = Login.find_one({"_id": ObjectId(id)}) # tìm user đang đăng nhập
     if request.method == 'GET':
         return render_template('user/user-update.html', update_user=login)
     elif request.method == 'POST':
+        # lấy dữ liệu từ form 
         form = request.form
         fullname = form['fullname']
         username = form['username']
@@ -226,6 +227,7 @@ def updateLoginUser(id):
         address = form['address']
         # level = form['level']
 
+        # thực hiện update bằng pymongo
         update_login = {"$set": {
             "fullname": fullname,
             "username": username,
@@ -297,19 +299,25 @@ def addMoneyUser(): # hàm nạp tiền cho tài khoản user
 
 # Thêm sản phẩm vào giỏ hàng
 @app.route('/add_order/<product_id>', methods=['GET', 'POST'])
-def addOrder(product_id):
-    if "loggedin" in session:
+def addOrder(product_id): # thực hiện hàm tạo đơn order, thêm sản phẩm vào giỏ hàng
+    if "loggedin" in session: # nếu tồn tại phiên đăng nhập thì thực hiện
         if session['loggedin'] == True:
-            if session['level_loggedin'] == "2":
-                found_user = Login.find_one(
-                    {"_id": ObjectId(session["user_id"])})
+            if session['level_loggedin'] == "2": # nếu là người dùng vơi vai trò user mới thực hiện
+                # tìm kiếm thông tin user
+                found_user = Login.find_one({"_id": ObjectId(session["user_id"])})
+                # tìm kiếm thông tin sản phẩm
                 found_product = Product.find_one({"_id": ObjectId(product_id)})
-                found_order = Order.find_one(
-                    {"user_id": session['user_id'], "is_ordered": False, "status": "Shipper chưa nhận đơn"})
+                # tìm kiếm thông tin đơn order
+                found_order = Order.find_one({"user_id": session['user_id'], "is_ordered": False, "status": "Shipper chưa nhận đơn"})
+                # nếu tìm thấy sản phẩm thì tiếp tục thực hiện
                 if found_product is not None:
+                    # nếu đơn order đã tồn tại thực hiện thêm sản phẩm
                     if found_order is not None:
+                        # lấy tổng tiền hiện tại của đơn order
                         ex_fee = found_order['order_fee']
+                        # cập nhật tổng tiền = giá bán sản phẩm + tổng tiền hiện tại
                         order_fee = int(found_product['price'])+int(ex_fee)
+                        # phí ship sẽ bằng 0,1 x tổng tiền
                         ship_fee = 0.1 * \
                             int(int(found_product['price'])+int(ex_fee))
                         # Tăng số lượng đã bán của sản phẩm
@@ -324,7 +332,7 @@ def addOrder(product_id):
                             "order_fee": order_fee,
                             "ship_fee": ship_fee,
                             # Thêm 1 sản phẩm vào giỏ hàng
-                        }, "$addToSet": {"product_id": {
+                        }, "$addToSet": {"product_id": { # thông tin sản phẩm
                             "_id": found_product['_id'],
                             "image": found_product['image'],
                             "name": found_product['name'],
@@ -340,7 +348,7 @@ def addOrder(product_id):
                         b = session['search']
                         a = "/search/" + b
                         return redirect(a)
-                    else:
+                    else: # trường hợp còn lại là chưa tồn tại đơn order, và sẽ tạo mới
                         # Tăng số lượng đã bán của sản phẩm
                         sold_count_ex = int(found_product['sold_count'])
                         sold_count_new = sold_count_ex + 1
@@ -349,8 +357,8 @@ def addOrder(product_id):
                         Product.update_one(found_product, update_product2)
                         # Tạo 1 đơn mới
                         add_order = {
-                            "user_id": session['user_id'],
-                            "product_id": [{
+                            "user_id": session['user_id'], # lưu id người mua
+                            "product_id": [{                # lưu thông tin sản phẩm
                                 "_id": found_product['_id'],
                                 "image": found_product['image'],
                                 "name": found_product['name'],
@@ -362,15 +370,16 @@ def addOrder(product_id):
                                 "product_gender": found_product['product_gender'],
                                 "product_kids": found_product['product_kids'],
                             }],
-                            "address": found_user['address'],
-                            "order_time": datetime.now(),
-                            "order_fee": int(found_product['price']),
-                            "ship_fee": 0.1*int(found_product['price']),
-                            "is_ordered": False,
-                            "status": "Shipper chưa nhận đơn",
-                            "shipper_id": "null",
+                            "address": found_user['address'], # địa chỉ người mua
+                            "order_time": datetime.now(), # thời gian gửi yêu cầu
+                            "order_fee": int(found_product['price']), # tiền sản phẩm
+                            "ship_fee": 0.1*int(found_product['price']), #phí ship
+                            "is_ordered": False, # trạng thái order
+                            "status": "Shipper chưa nhận đơn", # trạng thái của đơn hàng khi vận chuyển
+                            "shipper_id": "null", # id của shipper nhận đơn
                         }
                         Order.insert_one(add_order)
+                        
                         b = session['search']
                         a = "/search/" + b
                         return redirect(a)
@@ -384,30 +393,35 @@ def addOrder(product_id):
         return redirect('/login')
 
 # Hiển thị giỏ hàng
-@app.route('/cart', methods=['GET', 'POST'])
-def cart():
-    if "loggedin" in session:
+@app.route('/cart', methods=['GET', 'POST']) 
+def cart(): #  hàm hiển thị giỏ hàng
+    if "loggedin" in session: # nếu tồn tại phiên đăng nhập
         if session['loggedin'] == True:
-            if session['level_loggedin'] == "2":
-                found_order = Order.find_one(
-                    {"user_id": session['user_id'], 'is_ordered': False, 'status': "Shipper chưa nhận đơn"})
+            if session['level_loggedin'] == "2": # kiểm tra nếu level phiên đăng nhập == 2 là user thì thực hiện
+                # tìm đơn order hiện tại của user
+                found_order = Order.find_one({"user_id": session['user_id'], 'is_ordered': False, 'status': "Shipper chưa nhận đơn"})
+                # nếu người dùng yêu cầu trang giỏ hàng thì sẽ trả về trang "cart.html"
                 if request.method == 'GET':
-                    if found_order is not None:
+                    if found_order is not None: # nếu order tồn tại thì thực hiện hiển thị
                         cart = found_order
                         order_product = cart['product_id']
                         return render_template('user/cart.html', cart=cart, order_product=order_product, template=1)
-                    else:
+                    else: # nếu không tìm thấy đơn order nào sẽ trả về đơn hàng trống
                         return render_template('user/cart.html', template=0)
+                # chức năng cập nhật thời gian yêu cầu nhận hàng, mặc định sẽ là giao hàng bất cứ lúc nào(chỉnh sửa thời gian muốn nhận hàng theo ý muốn)
                 elif request.method == 'POST':
                     form = request.form
                     request_time = form['request_time']
+                    # thực hiện lưu mới vào database
                     update = {"$set": {
                         'request_time': request_time,
                     }}
                     Order.update_one(found_order, update)
                 return redirect('/cart')
+            # nếu level loggedin == 3 là shipper thì không có quyền được vào trang giỏ hàng
             elif session['level_loggedin'] == "3":
                 return redirect('/')
+            # nếu level loggedin == 1 là 1 thì không có quyền được vào trang giỏ hàng
             elif session['level_loggedin'] == "1":
                 return redirect('/')
         else:
@@ -417,13 +431,14 @@ def cart():
 
 # Xóa một sản phẩm khỏi giỏ hàng
 @app.route('/delete_product/<product_id>')
-def delete_product(product_id):
-    order = Order.find_one(
-        {'user_id': session['user_id'], 'is_ordered': False, 'status': "Shipper chưa nhận đơn"})
+def delete_product(product_id): # hàm xóa 1 sản phẩm có trong giỏ hàng
+    # tìm đơn order hiện có của user đang đăng nhập
+    order = Order.find_one({'user_id': session['user_id'], 'is_ordered': False, 'status': "Shipper chưa nhận đơn"})
 
     c = order['product_id']
+    # nếu tồn tại đơn order
     if len(c) > 1:
-
+        # thực hiện tìm thông tin sản phẩm muốn xóa = id sản phẩm
         product = Product.find_one({"_id": ObjectId(product_id)})
         # Giảm số lượng đã bán của sản phẩm
         sold_count_ex = int(product['sold_count'])
@@ -432,37 +447,49 @@ def delete_product(product_id):
         Product.update_one(product, update_product2)
         # Xóa 1 sản phẩm
         Order.update_one(
+            # update đơn order hiện tại user muốn xóa sản phẩm
             {'_id': ObjectId(order['_id'])},
+            # xóa 1 object khỏi trưởng product_id thuộc kiểu array , $pull là lấy ra
             {'$pull': {"product_id": {'_id': ObjectId(product_id)}}},
         )
-
+        # cập nhật lại giá tiền khi xóa 1 sản phẩm
         order_fee_ex = int(order['order_fee'])
         product_price = int(product['price'])
         new_order_fee = int(order_fee_ex) - int(product_price)
         new_ship_fee = (0.1 * new_order_fee)
+        # thực hiện cập nhật trên database
         Order.update_one(
             {'_id': ObjectId(order['_id'])},
             {'$set': {"order_fee": new_order_fee, "ship_fee": new_ship_fee}},
         )
         return redirect('/cart')
+    # trường hợp đơn order tồn tại duy nhất 1 sản phẩm
     elif len(c) == 1:
+        #thực hiện tìm kiếm thông tin sản phẩm bằng id
         product = Product.find_one({"_id": ObjectId(product_id)})
         # Giảm số lượng đã bán của sản phẩm
         sold_count_ex = int(product['sold_count'])
         sold_count_new = sold_count_ex - 1
         update_product2 = {"$set": {"sold_count": sold_count_new}}
         Product.update_one(product, update_product2)
+        # thực hiện xóa document hiện tại khi chỉ còn 1 object(sản phẩm) trong trường "product_id"
         Order.delete_one(order)
         return redirect('/cart')
 
 # Gửi yêu cầu mua đơn hàng
 @app.route('/ordered/<order_id>')
-def ordered(order_id):
+def ordered(order_id): # hàm gửi yêu cầu nhận id của đơn order
+    # tìm thông tin đơn order
     found_order = Order.find_one({"_id": ObjectId(order_id)})
+    # tìm thông tin người dùng gửi yêu cầu
     found_user = Login.find_one({"_id": ObjectId(found_order['user_id'])})
+    # nếu tồn tại đơn order
     if found_order is not None:
+        # tổng tiền sẽ bằng phí sản phẩm + phí ship
         total = int(found_order['order_fee']) + int(found_order['ship_fee'])
+        # lấy số tiền hiện có của user
         ex_balance = int(found_user['balance'])
+        # nếu số tiền hiện có của user > tổng tiền đơn hàng thì thực hiện
         if ex_balance >= total:
             # Trừ tiền
             balance = ex_balance - total
@@ -470,7 +497,7 @@ def ordered(order_id):
                 "balance": balance,
             }}
             Login.update_one(found_user, update_user)
-            #
+            # cập nhật trạng thái đơn hàng chuyển từ false sang True (đã gửi yêu cầu mua hàng)
             update_order = {"$set": {
                 "is_ordered": True,
             }}
@@ -495,20 +522,22 @@ def ordered(order_id):
 
 # Hiển thị trạng thái đơn hàng đã yêu cầu
 @app.route('/order_status')
-def orderStatus():
-    all_order = Order.find(
-        {'user_id': session['user_id'], 'is_ordered': True, 'shipper_id': "null"})
+def orderStatus(): # hàm hiển thị tất cả các đơn hàng đã gửi đi của user
+    # tìm tất cả các đơn hàng của user đăng nhập với id bằng phiên id đăng nhập hiện tại, tình trạng order = true(đã gửi yêu cầu),shipper_id = null(đã gửi yêu cầu và chưa shipper nhận đơn)
+    all_order = Order.find({'user_id': session['user_id'], 'is_ordered': True, 'shipper_id': "null"})
+    # đếm số lượng đơn order tìm thấy trong database
     c = int(all_order.count())
+    # nếu > 0(tồn tại 1 đơn trở lên) sẽ thực hiện hiển thị
     if c > 0:
         return render_template('user/order-status.html', all_order=all_order, template=1)
-    else:
+    else: # trả về template thông báo hiện không có đơn nào tồn tại
         return render_template('user/order-status.html', template=0)
 
 # Hiển thị trạng thái đơn hàng đã yêu cầu và có shipper nhận
 @app.route('/order_status_receiver')
-def orderStatusReceiver():
-    all_order = Order.find({'user_id': session['user_id'], 'is_ordered': True,
-                            "status": "Shipper đã nhận hàng, bắt đầu tiến hành vận chuyển"})
+def orderStatusReceiver(): # hàm hiển thị đơn hàng đã có shipper nhận
+    # thực hiện tìm kiếm những đơn có shipper chấp nhận vận chuyển, thông tin vận chuyển lưu vào status
+    all_order = Order.find({'user_id': session['user_id'], 'is_ordered': True,"status": "Shipper đã nhận hàng, bắt đầu tiến hành vận chuyển"})
     c = int(all_order.count())
     if c > 0:
         return render_template('user/order-status.html', all_order=all_order, template=1)
@@ -516,20 +545,22 @@ def orderStatusReceiver():
         return render_template('user/order-status.html', template=0)
 
 # Hai nút tìm kiếm tình trạng các đơn hàng của user
-@app.route('/user_status_select')
+@app.route('/user_status_select') 
 def user_status_select():
+    # hàm phụ để hiện thị 2 nút bấm cho người dùng khi người dùng vào trang các đơn hiện tại
     return render_template('user/user-status-select.html')
 
 # Cập nhật địa chỉ ship đơn hàng
 @app.route('/update_address', methods=['GET', 'POST'])
 def updateAddress():
-    found_order = Order.find_one(
-        {'user_id': session['user_id'], 'is_ordered': False, 'status': "Shipper chưa nhận đơn"})
+    # hàm cập nhật địa chỉ ship hàng trước khi gửi yêu cầu mua hàng, mặc định sẽ là địa chỉ mặc định khi đăng ký tài khoản
+    found_order = Order.find_one({'user_id': session['user_id'], 'is_ordered': False, 'status': "Shipper chưa nhận đơn"})
     if request.method == 'GET':
         return render_template('user/update-address.html', found_order=found_order)
     elif request.method == 'POST':
         form = request.form
         address = form['address']
+        # thực hiện update địa chỉ ship hàng
         update = {"$set": {
             "address": address,
         }}
@@ -539,17 +570,22 @@ def updateAddress():
 # User xác nhận đã nhận được hàng
 @app.route('/receive_order/<order_id>')
 def receive_order(order_id):
+    # khi nhận được hàng, user thực hiện bấm nút xác nhận "Đã nhận được hàng."
+    # tìm đơn order hiện tại
     found_order = Order.find_one({"_id": ObjectId(order_id)})
+    # nếu tìm thấy đơn order
     if found_order is not None:
-            # Chuyển trạng thái đơn
+            # Chuyển trạng thái đơn sang false và cập nhật trạng thái status = "User đã nhận được hàng"
         update1 = {"$set": {
             "status": "User đã nhận hàng",
             "is_ordered": False,
         }}
         Order.update_one(found_order, update1)
         # Add phí vận chuyển cho Shipper
+        # tìm thông tin shipper qua id
         id_shipper = found_order['shipper_id']
         found_shipper = Login.find_one({"_id": ObjectId(id_shipper)})
+        # thực hiện cộng tiền ship vào tài khoản shipper
         ship_fee = found_order['ship_fee']
         if found_shipper['balance'] == 0:
             update2 = {"$set": {"balance": ship_fee, }}
@@ -577,23 +613,27 @@ def receive_order(order_id):
 # Hiển thị lịch sử mua hàng
 @app.route('/order_history')
 def order_history():
+    # thực hiện tìm kiếm những đơn hàng mà user đã xác nhận giao hàng thành công
     all_order = Order.find(
         {'user_id': session['user_id'], 'is_ordered': False, 'status': "User đã nhận hàng"})
     if all_order is not None:
+        # nếu tồn tại thì hiển thị các đơn hàng
         return render_template('user/order-history.html', all_order=all_order, template=1)
     else:
+        # thông báo cho người dùng biết không có đơn hàng nào tồn tại
         return render_template('user/order-history.html', template=0)
 
 # Logout shipper login user
 @app.route('/logoutShipper_loginUser')
 def logoutShipper_loginUser():
+    # hàm thực hiện đăng xuất phiên đăng nhập
     if session['loggedin'] == False:
         return redirect('/login')
     else:
         session['loggedin'] = False
-        if session['level_loggedin'] == "1":
-            del session['admin_id']
-            del session['level_loggedin']
+        if session['level_loggedin'] == "1": # thực hiện kiểm tra lần lượt các session level
+            del session['admin_id'] # thực hiện xóa session để đăng xuất
+            del session['level_loggedin']# thực hiện xóa session để đăng xuất
         elif session['level_loggedin'] == "2":
             del session['user_id']
             del session['level_loggedin']
@@ -701,10 +741,12 @@ def updateShipper(id):
 # Các đơn hàng hiện có cho shipper
 @app.route('/ship_request')
 def requestShipper():
+    # thực hiện tìm kiếm các đơn order user đã gửi và chưa có người nhận
     all_order = Order.find(
         {'is_ordered': True, 'status': "Shipper chưa nhận đơn"})
     c = int(all_order.count())
     if c > 0:
+        # trả về trang html các yêu cầu đơn order cho shipper
         return render_template('shipper/ship-request.html', template=1, all_order=all_order)
     else:
         return render_template('shipper/ship-request.html', template=0)
@@ -716,10 +758,13 @@ def ship_status_select():
 
 # Chi tiết đơn hàng
 @app.route('/detail_request/<order_id>')
-def requestDetail(order_id):
+def requestDetail(order_id): # hàm nhận id của đơn order để thực hiện
+    # thực hiện tìm kiếm đơn order
     found_order = Order.find_one({"_id": ObjectId(order_id)})
     if found_order is not None:
+        # tìm kiếm thông tin user từ id_user lưu trong đơn order
         user = Login.find_one({"_id": ObjectId(found_order['user_id'])})
+        # thực hiện lấy mảng chứa thông tin các sản phẩm
         order_product = found_order['product_id']
         return render_template('shipper/detail-request.html', found_order=found_order, user=user, order_product=order_product)
     else:
@@ -728,9 +773,12 @@ def requestDetail(order_id):
 # Lịch sử ship đơn hàng
 @app.route('/shipped_history')
 def historyShipper():
-    all_order = Order.find(
-        {'shipper_id': session['shipper_id'], 'status': "User đã nhận hàng"})
+    # những đơn shipper đã giao thành công và user xác nhận đã nhận được hàng
+    # thực hiện tìm kiếm tất cả các đơn đã giao của shipper hiện tại
+    all_order = Order.find({'shipper_id': session['shipper_id'], 'status': "User đã nhận hàng"})
+    # đếm số lượng đơn order
     c = int(all_order.count())
+    # nếu tồn tại thì thực hiện truyền dữ liệu sang html và hiển thị
     if c > 0:
         return render_template('shipper/shipped-history.html', all_order=all_order, template=1)
     else:
@@ -738,12 +786,15 @@ def historyShipper():
 
 # Shipper nhận đơn hàng
 @app.route('/shipper_accepted_order/<order_id>')
-def shipper_accepted_order(order_id):
+def shipper_accepted_order(order_id): # nhận đơn hàng khi user gửi yêu cầu với id đơn order
+    # thực hiện tìm kiếm đơn order
     found_order = Order.find_one({"_id": ObjectId(order_id)})
     if found_order is not None:
+        # lấy ra id user
         id_user = found_order['user_id']
+        # thực hiện tìm kiếm user
         found_user = Login.find_one({"_id": ObjectId(id_user)})
-        # Thêm ID của Shipper vào đơn và #Đổi trạng thái đơn
+        # Thêm ID của Shipper vào đơn và đổi trạng thái đơn
         update = {"$set": {"shipper_id": session['shipper_id'],
                            "status": "Shipper đã nhận đơn, đang tiến hành lấy hàng"}}
         Order.update_one(found_order, update)
@@ -764,8 +815,11 @@ def shipper_accepted_order(order_id):
 # Xem thông tin đơn hiện tại Shipper chấp nhận vận chuyển
 @app.route('/ship_status/<status>')
 def ship_status(status):
-    found_order = Order.find(
-        {'shipper_id': session['shipper_id'], 'status': status})
+    # những đơn hàng má shipper nhận sẽ có 2 trạng thái
+    # trạng thái 1: Shipper đã nhận đơn, đang tiến hành lấy hàng
+    # trạng thái 2: Shipper đã nhận hàng, bắt đầu tiến hành vận chuyển
+    # thực hiện tìm kiếm status với trạng thái trên
+    found_order = Order.find({'shipper_id': session['shipper_id'], 'status': status})
     c = int(found_order.count())
     if c > 0:
         return render_template('shipper/ship-status.html', found_order=found_order, template=1)
@@ -775,13 +829,19 @@ def ship_status(status):
 # Shipper xác nhận đã lấy hàng
 @app.route('/product_request/<order_id>')
 def product_request(order_id):
+    # trạng thái thứ 2 khi shipper đã xác nhận lấy hàng và bắt đầu vận chuyển
+    # tìm đơn order hiện tại
     found_order = Order.find_one({"_id": ObjectId(order_id)})
     if found_order is not None:
+        # lấy thông tin id user
         id_user = found_order['user_id']
+        # tìm thông tin user
         found_user = Login.find_one({"_id": ObjectId(id_user)})
+        # thực hiện update trạng thái giao hàng trên database
         update = {
             "$set": {"status": "Shipper đã nhận hàng, bắt đầu tiến hành vận chuyển"}}
         Order.update_one(found_order, update)
+        # gửi email thông báo
         gmail = GMail('ngovankhanh108@gmail.com', 'KhanhNgo108')
         msg = Message(
             'LẤY HÀNG', to=found_user['email'], html="Shipper đã lấy được hàng, bắt đầu vận chuyển đến bạn")
@@ -796,6 +856,7 @@ def product_request(order_id):
 # Information Admin
 @app.route('/admin_information')
 def adminInformation():
+    # thông tin cá nhận 
     login = Login.find_one({"_id": ObjectId(session["admin_id"])})
     if login is not None:
         return render_template('admin/information.html', found_admin=login)
@@ -822,12 +883,14 @@ def updateInfoAdmin(id):
 # Hiển thị sản phẩm
 @app.route('/all_product_admin')
 def allProduct():
+    # tìm kiếm tất cả các sản phẩm có trên database
     all_product = Product.find()
     return render_template('admin/all_product.html', all_product=all_product)
 
 # Xóa sản phẩm
 @app.route('/product/delete/<id>')
 def deleteProduct(id):
+    # thực hiện xóa 1 sản phẩm khi 1 id sản phẩm được truyền vào hàm
     product = Product.find_one({"_id": ObjectId(id)})
     Product.delete_one(product)
     return redirect('/all_product_admin')
@@ -903,12 +966,14 @@ def addProduct():
 # Quản lý tài khoản
 @app.route('/all_login')
 def allLogin():
+    # tìm kiếm tất cả các tài khoản hiện có
     all_login = Login.find()
     return render_template('admin/all_login.html', all_login=all_login)
 
 # Xóa tài khoản
 @app.route('/all_login/delete/<id>')
 def deleteLogin(id):
+    # thực hiện xóa tải khoản khi admin thực hiện
     login = Login.find_one({"_id": ObjectId(id)})
     Login.delete_one(login)
     return redirect('/all_login')
@@ -916,6 +981,7 @@ def deleteLogin(id):
 # Sửa tài khoản
 @app.route('/edit_logins_admin/<id>', methods=['GET', 'POST'])
 def editLoginsAdmin(id):
+    # sửa các tài khoản hiện có trên database( quyền admin)
     login = Login.find_one({"_id":ObjectId(id)})
     if request.method == "GET":
         return render_template('admin/update_account.html',login = login)
@@ -939,12 +1005,14 @@ def editLoginsAdmin(id):
 # Xuất file Excel Account
 @app.route('/output_excel')
 def output_excel():
+    # lấy tất cả tài khoản
     all_login = Login.find()
+    # tạo mảng để lưu các trường
     data = []
     i = 0
     for login in all_login:
         list_login = {}
-        #
+        # lấy giá trị lưu vào biến
         index = i
         fullname = login['fullname']
         username = login['username']
@@ -953,7 +1021,7 @@ def output_excel():
         email = login['email']
         phone = login['phone']
         balance = login['balance']
-        #
+        # Key
         list_login['STT'] = index
         list_login['Fullname'] = fullname
         list_login['Username'] = username
@@ -964,7 +1032,9 @@ def output_excel():
         list_login['Balance'] = balance
         i = i + 1
         #
+        # thêm 1 list mới vào mảng
         data.append(list_login)
+    # thực hiện xuất file excel
     pyexcel.save_as(records=data, dest_file_name="Logins.xlsx")
     return "Done"
 
@@ -1044,48 +1114,50 @@ def output_order_excel():
 # Xuất hóa đơn ra Word
 @app.route('/output_bill_word/<id>')
 def output_bill_word(id):
-
+    # tìm đơn order muốn xuất
     order = Order.find_one({"_id":ObjectId(id)})
+    # lấy thông tin các sản phẩm
     all_product =order['product_id']
+    # tìm thông tin user
     user = Login.find_one({"_id":ObjectId(order['user_id'])})
-
+    # khởi tạo đối tượng
     document = Document()
-
+    # add tiêu đều
     document.add_heading('Hóa đơn bán hàng', 0)
-
+    # lấy ngày giờ order
     date = order['order_time']
     day = str(date.day)
     month = str(date.month)
     year = str(date.year)
+    # thêm ngày giờ vào hóa đơn
     document.add_heading('Ngày ' + day+"/"+month+"/"+year, 0)
-
-
+    # lấy tên khách hàng từ database
     document.add_heading("Tên khách hàng:  " + user['fullname'], level=1)
-
+    # duyết mảng sản phẩm để lấy thông tin sản phẩm
     index = 1
     for i in all_product:
         name = i['name']
         price = str(i['price'])
-
         s = "Sản phẩm " + str(index) + " :  " + name + "             " + price+"$"
         document.add_paragraph(s, style='Intense Quote')
         index += 1
-
+    # lấy thông tin địa chỉ từ đơn order
     document.add_paragraph("Địa chỉ:  " + order['address'], style='Intense Quote')
+    # lấy phí ship từ đơn hàng
     document.add_paragraph(
         "Phí ship:  " + str(order['ship_fee']), style='Intense Quote')
+    # tổng tiền hàng
     document.add_paragraph("Tổng tiền hàng : " +
                         str(order['order_fee']), style='Intense Quote')
+    # tổng tiền của dơn order phí ship + tiền hàng
     totalPrice = int(order['ship_fee']) + int(order['order_fee'])
     document.add_paragraph("Tổng thanh toán:  " +
                         str(totalPrice), style='Intense Quote')
 
     document.add_page_break()
-
-    document.save('demoWord.docx')
+    # xuất file word
+    document.save('HoaDonWord.docx')
     return "done"
-
-
 
 # TODO
 @app.route('/all_order')
